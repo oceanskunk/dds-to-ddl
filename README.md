@@ -15,11 +15,17 @@ This is intended to be a helper, not a flawless converter that you mindlessly ru
     * `CRTSQLRPGI OBJ(<your library>/CRTDDS) SRCSTMF('/home/<USER>/dds-to-ddl/qrpglesrc/CRTDDS.SQLRPGLE')`
 
 3. Call CVTDDS first
+    * `CALL PGM(CVTDDS) PARM('LIBRARY' 'FILENAME' 'SQLTABLE')`
+        * LIBRARY and FILENAME should point to the existing PF
+        * SQLTABLE is the name for the new SQL table
     * This will generate DDL for your new SQL table.
     * Review the source in QTEMP/QSQLSRC.
     * RUNSQLSTM to create the new table.
 
 4. Call CRTDDS next
+    * `CALL PGM(CRTDDS) PARM('LIBRARY' 'FILENAME' 'SQLTABLE')`
+        * LIBRARY and FILENAME should point to the existing PF
+        * SQLTABLE is the name for the new SQL table
     * This will generate DDS for new versions of the existing files.
     * The PF will be converted into a LF.
     * All existing LFs will be based on the new SQL table.
