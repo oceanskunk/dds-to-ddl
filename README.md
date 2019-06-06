@@ -11,8 +11,8 @@ This is intended to be a helper, not a flawless converter that you mindlessly ru
     * `git clone https://github.com/oceanskunk/dds-to-ddl.git`
 
 2. Compile the programs
-    * `CRTSQLRPGI OBJ(<your library>/CVTDDS) SRCFILE('/home/<USER>/dds-to-ddl/qrpglesrc/CVTDDS.SQLRPGLE')`
-    * `CRTSQLRPGI OBJ(<your library>/CRTDDS) SRCFILE('/home/<USER>/dds-to-ddl/qrpglesrc/CRTDDS.SQLRPGLE')`
+    * `CRTSQLRPGI OBJ(<your library>/CVTDDS) SRCSTMF('/home/<USER>/dds-to-ddl/qrpglesrc/CVTDDS.SQLRPGLE')`
+    * `CRTSQLRPGI OBJ(<your library>/CRTDDS) SRCSTMF('/home/<USER>/dds-to-ddl/qrpglesrc/CRTDDS.SQLRPGLE')`
 
 3. Call CVTDDS first
     * This will generate DDL for your new SQL table.
