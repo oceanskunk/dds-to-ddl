@@ -181,7 +181,11 @@
 
      // Include everything else
      else;
-         WriteSource(%scanrpl(%trim(inLib) + '.' : '' : inSource));
+         scratchPad = %scanrpl(%trim(inLib) + '.' + %trim(inFile)
+                              : %trim(inNewFile)
+                              : inSource
+                              );
+         WriteSource(scratchPad);
 
      endif;
 
