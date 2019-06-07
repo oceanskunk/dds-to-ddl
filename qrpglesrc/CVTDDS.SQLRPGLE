@@ -105,14 +105,14 @@
 
      // Keep comments and blank lines
      if inSource = *blanks
-     or %subst(inSource : 1 : 2) = '--';
+     or StartsWith(%trim(inSource) : '-- ');
          WriteSource(inSource);
          if inSource = *blanks;
              clear currentStep;
          endif;
 
      // Create table clause
-     elseif %scan('CREATE TABLE ' : %trim(inSource) : 1) > 0;
+     elseif StartsWith(%trim(inSource) : 'CREATE TABLE ');
          WriteSource('-- ' + inSource);
          CreateTableClause();
 
@@ -123,24 +123,24 @@
      elseif currentStep = DEFINE_COLUMNS;
          // If a PF is defined with UNIQUE key(s), the generated source
          // will include a PRIMARY KEY that we don't want to include.
-         if %subst( %trim(inSource) : 1 : 11) <> 'PRIMARY KEY';
+         if not StartsWith(%trim(inSource) : 'PRIMARY KEY');
              WriteSource(BLANK_LINE);
              CreateColumn(inSource);
          endif;
 
          // If the last character is an end-parenthesis, we're finished
          // with defining the columns.
-         if EndsWith(inSource : ')');
+         if EndsWith(%trim(inSource) : ')');
              AddMetadataColumns();
              WriteSource(END_COLUMN_DEFINITIONS);
          endif;
 
      // Record Format definition
-     elseif %scan('RCDFMT ' : %trim(inSource) : 1) > 0;
+     elseif StartsWith(%trim(inSource) : 'RCDFMT ');
          WriteSource(inSource);
 
      // Label on table
-     elseif %scan('LABEL ON TABLE ' : %trim(inSource) : 1) > 0
+     elseif StartsWith(%trim(inSource) : 'LABEL ON TABLE ')
      or currentStep = LABEL_TABLE;
          if currentStep <> LABEL_TABLE;
              // Remove the hard-coded library name
@@ -150,12 +150,12 @@
          else;
              WriteSource(inSource);
          endif;
-         if EndsWith(inSource : ';');
+         if EndsWith(%trim(inSource) : ';');
              clear currentStep;
          endif;
 
      // Label on column
-     elseif %scan('LABEL ON COLUMN ' : %trim(inSource) : 1) > 0
+     elseif StartsWith(%trim(inSource) : 'LABEL ON COLUMN ')
      or currentStep = LABEL_COLUMN;
          if currentStep <> LABEL_COLUMN;
              scratchPad = %scanrpl(%trim(inLib) + '.' : '' : inSource) ;
@@ -165,17 +165,17 @@
          else;
              columnName = %subst(inSource : 3 : %scan(' ' : inSource : 3) - 3);
              scratchPad = %subst(inSource : %scan(' ' : inSource : 3) );
-             if EndsWith(scratchPad : ',');
+             if EndsWith(%trim(scratchPad) : ',');
                   scratchPad = %subst(scratchPad : 1 : %len(%trim(scratchPad)) - 1);
              endif;
-             if StartsWith(inSource : '(');
+             if StartsWith(%trim(inSource) : '(');
                  scratchPad = '  ' + columnName + %trim(scratchPad);
              else;
                  scratchPad = ', ' + columnName + %trim(scratchPad);
              endif;
              WriteSource(scratchPad);
          endif;
-         if %subst(%trim(inSource) : %len(%trim(inSource)) : 1) = ';';
+         if EndsWith( %trim(inSource) : ';');
              clear currentStep;
          endif;
 
@@ -551,19 +551,21 @@
 
  //----------------------------------------------------------------------------------------
  // Starts With
- // Returns *ON if the first non-blank character is a match
+ // Returns *ON if inSource begins with inSearch
  //----------------------------------------------------------------------------------------
  dcl-proc  StartsWith;
    dcl-pi  StartsWith  ind;
-       inString  varchar(2000) const;
-       inMatch   char(1) const;
+       inSource  varchar(2000) const;
+       inSearch  varchar(2000) const;
    end-pi;
    dcl-s  theyMatch ind;
-   dcl-s  firstChar  char(1);
-   firstChar = %subst(%trim(inString) : 1 : 1);
-   if firstChar = inMatch;
-       theyMatch = *on;
-   endif;
+
+   Exec SQL
+       SET :theyMatch =
+         CASE WHEN :inSource LIKE :inSearch CONCAT '%'
+                  THEN '1'
+              ELSE '0'  END;
+
    return theyMatch;
  end-proc  StartsWith;
 
@@ -574,15 +576,17 @@
  //----------------------------------------------------------------------------------------
  dcl-proc  EndsWith;
    dcl-pi  EndsWith  ind;
-       inString  varchar(2000) const;
-       inMatch   char(1) const;
+       inSource  varchar(2000) const;
+       inSearch  varchar(2000) const;
    end-pi;
    dcl-s  theyMatch ind;
-   dcl-s  lastChar  char(1);
-   lastChar = %subst(%trim(inString) : %len(%trim(inString)) : 1);
-   if lastChar = inMatch;
-       theyMatch = *on;
-   endif;
+
+   Exec SQL
+       SET :theyMatch =
+         CASE WHEN :inSource LIKE '%' CONCAT :inSearch
+                  THEN '1'
+              ELSE '0'  END;
+
    return theyMatch;
  end-proc  EndsWith;
 
