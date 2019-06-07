@@ -272,12 +272,19 @@
 
      if sqlName = systemName
      and columnText <> *blanks;
-         column = %scanrpl(' ' : '_' : %trim(columnText));
+         column = %trim(columnText);
      elseif sqlName = systemName ;
          column = %trim(sqlName) + '_SQL_NAME';
      else;
          column = sqlName;
      endif;
+     // convert special characters to words and underscores
+     Exec SQL
+       SET :column = TRANSLATE( TRIM(REPLACE(:column , '%' , 'Pct'))
+                              , '______'
+                              , ' /-*&%'
+                              );
+
 
      defn = FormatFieldDefinition( columnType
                                  : columnLength
