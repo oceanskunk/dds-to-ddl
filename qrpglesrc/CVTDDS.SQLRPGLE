@@ -164,6 +164,7 @@
              currentStep = LABEL_COLUMN;
          else;
              columnName = %subst(inSource : 3 : %scan(' ' : inSource : 3) - 3);
+             columnName = %scanrpl('"' : '' : columnName);
              scratchPad = %subst(inSource : %scan(' ' : inSource : 3) );
              if EndsWith(%trim(scratchPad) : ',');
                   scratchPad = %subst(scratchPad : 1 : %len(%trim(scratchPad)) - 1);
@@ -219,6 +220,9 @@
      dcl-s  column char(37);
      dcl-s  defn  char(35);
      dcl-s  ccsid  varchar(15);
+     dcl-s  allocate varchar(20);
+     dcl-s  scanPos1  int(10);
+     dcl-s  scanPos2  int(10);
      dcl-s  comma   char(3)  inz(',  ');
      dcl-s  nullable  char(10);
      dcl-s  dftValue  varchar(150);
@@ -280,8 +284,22 @@
                                  : columnScale
                                  );
 
-     if columnCcsid >= 0;
+     if columnType = 'VARCHAR'
+     and %scan( ' ALLOCATE(' : inSource) > 0;
+         scanPos1 = %scan( 'ALLOCATE(' : inSource);
+         scanPos2 = %scan( ')' : inSource : scanPos1);
+         scanPos1 += 9;
+         allocate = 'ALLOCATE(' + %subst(inSource : scanPos1 : scanPos2 - scanPos1 + 1);
+     endif;
+
+     if columnCcsid >= 0
+     and columnType <> 'DATE'
+     and columnType <> 'TIME'
+     and columnType <> 'TIMESTMP';
          ccsid = 'CCSID ' + %char(columnCcsid);
+         if allocate <> *blanks;
+             ccsid = ' ' + ccsid;
+         endif;
      endif;
 
      if not columnAllowNull;
@@ -293,7 +311,7 @@
      endif;
 
      WriteSource( comma + column + 'FOR COLUMN ' + systemName );
-     WriteSource( SMALL_TAB + defn + ccsid );
+     WriteSource( SMALL_TAB + defn + allocate + ccsid );
      WriteSource( BIG_TAB + nullable );
      WriteSource( BIG_TAB + dftValue );
 
