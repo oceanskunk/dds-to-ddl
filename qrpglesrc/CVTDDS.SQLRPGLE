@@ -583,15 +583,9 @@
        inSource  varchar(2000) const;
        inSearch  varchar(2000) const;
    end-pi;
-   dcl-s  theyMatch ind;
 
-   Exec SQL
-       SET :theyMatch =
-         CASE WHEN :inSource LIKE :inSearch CONCAT '%'
-                  THEN '1'
-              ELSE '0'  END;
+   return (%scan(inSearch : inSource : 1) = 1);
 
-   return theyMatch;
  end-proc  StartsWith;
 
 
