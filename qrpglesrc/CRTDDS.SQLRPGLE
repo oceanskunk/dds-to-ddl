@@ -18,7 +18,7 @@
  ctl-opt  dftactgrp(*no);
  ctl-opt  debug;
  ctl-opt  option(*srcstmt : *nodebugio : *nounref);
- ctl-opt  bnddir('CAMSRVPGM');
+ 
 
  dcl-pi  EntryPlist   extpgm('CRTDDS');
      inLib char(10) const;
@@ -38,8 +38,6 @@
      fieldName char(10) pos(19);
      keyword   char(30) pos(45);
  end-ds;
-
- /include QRPGLECPY,SRVUTIL
 
  Exec SQL Set Option CLOSQLCSR=*ENDMOD, COMMIT=*NONE, DATFMT=*ISO;
 
