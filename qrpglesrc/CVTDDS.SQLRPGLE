@@ -144,7 +144,10 @@
      or currentStep = LABEL_TABLE;
          if currentStep <> LABEL_TABLE;
              // Remove the hard-coded library name
-             scratchPad = %scanrpl(%trim(inLib) + '.' : '' : inSource);
+             // and use the new system name
+             scratchPad = %scanrpl( %trim(inLib) + '.' + %trim(inFile)
+                                  : %trim(inNewFile)
+                                  : inSource );
              WriteSource(scratchPad);
              currentStep = LABEL_TABLE;
          else;
@@ -158,7 +161,11 @@
      elseif StartsWith(%trim(inSource) : 'LABEL ON COLUMN ')
      or currentStep = LABEL_COLUMN;
          if currentStep <> LABEL_COLUMN;
-             scratchPad = %scanrpl(%trim(inLib) + '.' : '' : inSource) ;
+             // Remove the hard-coded library name
+             // and use the new system name
+             scratchPad = %scanrpl( %trim(inLib) + '.' + %trim(inFile)
+                                  : %trim(inNewFile)
+                                  : inSource );
              WriteSource(scratchPad);
              WriteSource('(');
              currentStep = LABEL_COLUMN;
