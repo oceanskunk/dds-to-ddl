@@ -451,7 +451,12 @@
      if tableText <> *blanks;
          tableName = %scanrpl(' ' : '_' : %trim(tableText));
      else;
-         tableName = %trim(inNewFile) + '_SQL_NAME';
+         tableName = %trim(inNewFile);
+     endif;
+
+     // The SQL Name (ALIAS) must be > 10 characters
+     if %len(tableName) < 11;
+         tableName += '_SQL_NAME';
      endif;
 
      WriteSource('CREATE OR REPLACE TABLE ' + tableName);
