@@ -224,7 +224,7 @@
      dcl-s  columnDefaultValue  varchar(128);
      dcl-s  isFirstColumn  ind;
 
-     dcl-s  column char(37);
+     dcl-s  column char(36);
      dcl-s  defn  char(35);
      dcl-s  ccsid  varchar(15);
      dcl-s  allocate varchar(20);
@@ -277,20 +277,28 @@
 
      WriteSource('-- ' + inSource);
 
-     if sqlName = systemName
-     and columnText <> *blanks;
-         column = %trim(columnText);
-     elseif sqlName = systemName ;
-         column = %trim(sqlName) + '_SQL_NAME';
+     if sqlName = systemName;
+         if columnText <> *blanks;
+             column = %trim(columnText);
+         else;
+             column = %trim(sqlName) + '_SQL_NAME';
+         endif;
      else;
          column = sqlName;
      endif;
+
      // convert special characters to words and underscores
      Exec SQL
-       SET :column = TRANSLATE( TRIM(REPLACE(:column , '%' , 'Pct'))
-                              , '______'
-                              , ' /-*&%'
-                              );
+       SET :column = TRIM(REPLACE(:column , '%' , 'Pct'));
+
+     Exec SQL
+       SET :column = REGEXP_REPLACE( TRIM(:column)
+                                   , '[^A-Za-z0-9]'
+                                   , '_'
+                                   );
+
+     Exec SQL
+       SET :column = REPLACE(:column , '__' , '_');
 
 
      defn = FormatFieldDefinition( columnType
@@ -324,7 +332,7 @@
          dftValue = 'WITH DEFAULT ' + columnDefaultValue;
      endif;
 
-     WriteSource( comma + column + 'FOR COLUMN ' + systemName );
+     WriteSource( comma + column + ' FOR COLUMN ' + systemName );
      WriteSource( SMALL_TAB + defn + allocate + ccsid );
      WriteSource( BIG_TAB + nullable );
      WriteSource( BIG_TAB + dftValue );
